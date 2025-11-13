@@ -15,36 +15,47 @@ pipeline {
 
         stage('Install & Test') {
             steps {
-                sh 'pip install -r requirements.txt'
-                sh 'pytest || echo "No tests yet"'
+                bat 'pip install -r requirements.txt'
+                bat 'pytest || echo No tests yet'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh "docker build -t $IMAGE_NAME:latest ."
+                bat "docker build -t %IMAGE_NAME%:latest ."
             }
         }
 
         stage('Load Image into kind') {
             steps {
-                sh "kind load docker-image $IMAGE_NAME:latest --name $CLUSTER_NAME"
+                bat "kind load docker-image %IMAGE_NAME%:latest --name %CLUSTER_NAME%"
             }
         }
 
         stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply -f k8s/deployment.yaml'
-                sh 'kubectl apply -f k8s/service.yaml'
-                sh 'kubectl rollout status deployment/flask-app'
+                bat 'kubectl delete -f k8s/deployment.yaml --ignore-not-found'
+                bat 'kubectl delete -f k8s/service.yaml --ignore-not-found'
+                bat 'kubectl apply -f k8s/deployment.yaml'
+                bat 'kubectl apply -f k8s/service.yaml'
+                bat 'kubectl rollout status deployment/flask-app'
             }
         }
 
         stage('Verify Deployment') {
             steps {
-                sh 'kubectl get pods'
-                sh 'kubectl get svc'
+                bat 'kubectl get pods'
+                bat 'kubectl get svc'
             }
+        }
+    }
+
+    post {
+        success {
+            echo "✅ Deployment succeeded!"
+        }
+        failure {
+            echo "❌ Pipeline failed — check logs."
         }
     }
 }
