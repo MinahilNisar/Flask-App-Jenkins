@@ -1,4 +1,4 @@
-pipeline {
+﻿pipeline {
     agent any
 
     environment {
@@ -52,10 +52,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ Deployment succeeded!"
+            echo " Deployment succeeded!"
         }
         failure {
-            echo "❌ Pipeline failed — check logs."
+            echo " Pipeline failed — check logs."
         }
     }
 }
